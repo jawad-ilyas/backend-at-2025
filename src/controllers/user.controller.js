@@ -3,7 +3,7 @@ import { User } from "../models/user.model.js"
 import { ApiError } from "../utilis/ApiError.uitilis.js";
 import { ApiResponse } from "../utilis/ApiResponse.utilis.js";
 import uploadCloudinary from "../utilis/cloudinary.utilis.js";
-
+import jwt from "jsonwebtoken";
 const generatingAccessAndRefreshToken = async (userId) => {
 
     console.log('====================================');
@@ -209,5 +209,41 @@ const logoutUser = asyncHandler(async (req, res) => {
 
 })
 
-export { registerUser, loginUser }
+
+const refreshAccessToken = asyncHandler(async (req, res) => {
+
+    const incompingRefreshToken = req?.cookies?.refreshToken || req?.header("Authorization")?.replace("Bearer ", "")
+    console.log("incompingRefreshToken", incompingRefreshToken);
+
+    if (!incompingRefreshToken) {
+        throw new ApiError(404, "token is not found ")
+    }
+
+    const decodedToken = jwt.verify(incompingRefreshToken, process.env.REFRESH_TOKEN_SECRET)
+    console.log("user into refresh access token fun :: ", decodedToken);
+
+    const user = await User.findById(decodedToken?._id)
+    console.log("user into refresh access token fun :: ", user);
+
+    if (!user) {
+        throw new ApiError(404, "user is not found ")
+    }
+    if (incompingRefreshToken !== user?.refreshToken) {
+        throw new ApiError(404, "token  is not found ")
+    }
+    const { accessToken, refreshToken } = await generatingAccessAndRefreshToken(user?._id);
+
+    const options = {
+        httpOnly: true,
+        secure: true
+    }
+
+    res.status(200)
+        .cookie("accessToken", accessToken, options)
+        .cookie("refreshToken", refreshToken, options)
+        .json(new ApiResponse(200, { accessToken, refreshToken }, "token again generated  "))
+
+})
+
+export { registerUser, loginUser, logoutUser, refreshAccessToken }
 
