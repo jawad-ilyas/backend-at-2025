@@ -13,7 +13,7 @@ class ApiError extends Error {
         this.success = false
         this.errors = errors
         this.name = this.constructor.name; // optional but helpful
-        this.functionName = functionName;
+        // this.functionName = functionName;
 
         if (stack) {
             this.stack = stack

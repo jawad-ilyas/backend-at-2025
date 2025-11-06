@@ -1,7 +1,14 @@
 import cloudinary from "cloudinary";
 import fs from "fs";
+import dotenv from "dotenv";
+dotenv.config(); // ✅ ensures env variables available here too
 
-cloudinary.v2.config({
+
+console.log('====================================');
+console.log("process.env.CLOUDINARY_API_KEY,", process.env.CLOUDINARY_API_KEY);
+console.log("process.env.CLOUDINARY_SECRET_KEY,", process.env.CLOUDINARY_SECRET_KEY);
+console.log('====================================');
+cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
   api_key: process.env.CLOUDINARY_API_KEY,
   api_secret: process.env.CLOUDINARY_SECRET_KEY,
@@ -11,7 +18,7 @@ const uploadCloudinary = async (localImagePath) => {
   try {
     if (!localImagePath) throw new Error("No file path provided");
 
-    const result = await cloudinary.v2.uploader.upload(localImagePath, {
+    const result = await cloudinary.uploader.upload(localImagePath, {
       folder: "uploads", // optional - creates a folder in Cloudinary
       resource_type: "auto", // handles image, video, etc.
     });
